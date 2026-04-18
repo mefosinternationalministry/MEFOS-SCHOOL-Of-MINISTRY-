@@ -1,0 +1,72 @@
+import { useState } from "react";
+import { db } from "../lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+
+export default function Register() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: ""
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.email || !form.phone) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await addDoc(collection(db, "registrations"), {
+        ...form,
+        createdAt: new Date()
+      });
+
+      alert("Registration Successful!");
+
+      setForm({ name: "", email: "", phone: "" });
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Student Registration</h2>
+
+      <input
+        name="name"
+        placeholder="Name"
+        value={form.name}
+        onChange={handleChange}
+      /><br/><br/>
+
+      <input
+        name="email"
+        placeholder="Email"
+        value={form.email}
+        onChange={handleChange}
+      /><br/><br/>
+
+      <input
+        name="phone"
+        placeholder="Phone"
+        value={form.phone}
+        onChange={handleChange}
+      /><br/><br/>
+
+      <button onClick={handleSubmit} disabled={loading}>
+        {loading ? "Registering..." : "Register"}
+      </button>
+    </div>
+  );
+}
